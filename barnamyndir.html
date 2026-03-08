@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMBRA 2026 – Barnamyndir af starfsfólki FG</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #0033A0; --blue-dark: #00247A; --blue-darker: #001550;
+    --orange: #FF6B00; --orange-dark: #D45700;
+    --yellow: #F5C400; --yellow-dark: #C9A000;
+    --white: #FFFFFF; --off: #F4F6FB; --border: #DDE3F0;
+    --text: #0A1A3A; --muted: #6B7A99;
+    --green: #00C853; --red: #FF1744;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--blue-darker); color: var(--white); min-height: 100vh; }
+  body::before { content: ''; position: fixed; inset: 0; background: linear-gradient(rgba(0,51,160,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0,51,160,0.08) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+
+  header { background: var(--blue); border-bottom: 5px solid var(--orange); padding: 24px 32px; position: relative; z-index: 10; text-align: center; }
+  .header-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); margin-bottom: 2px; }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; color: var(--white); letter-spacing: 3px; line-height: 1; }
+  header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--yellow); letter-spacing: 2px; margin-top: 4px; }
+
+  main { max-width: 960px; margin: 0 auto; padding: 32px 16px 80px; position: relative; z-index: 1; }
+  .intro { text-align: center; margin-bottom: 28px; }
+  .intro p { font-size: 0.9rem; color: rgba(255,255,255,0.7); line-height: 1.6; max-width: 600px; margin: 0 auto; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 14px; margin-bottom: 32px; }
+
+  .photo-card { background: rgba(255,255,255,0.06); border: 2px solid rgba(255,255,255,0.1); border-radius: 6px; overflow: hidden; transition: all 0.3s; }
+  .photo-card.correct { border-color: var(--green); box-shadow: 0 0 12px rgba(0,200,83,0.3); }
+  .photo-card.wrong { border-color: var(--red); animation: shake 0.4s; }
+  @keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+
+  .photo-card img { width: 100%; aspect-ratio: 3/4; object-fit: cover; display: block; }
+  .photo-card .card-label { font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; letter-spacing: 2px; text-align: center; padding: 8px; color: var(--yellow); }
+  .photo-card .card-num { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700; text-align: center; padding: 8px; color: var(--green); display: none; }
+  .photo-card.correct .card-num { display: block; }
+  .photo-card .card-name { font-size: 0.8rem; text-align: center; padding: 4px 8px 8px; color: var(--green); display: none; }
+  .photo-card.correct .card-name { display: block; }
+
+  .photo-card select { width: 100%; padding: 10px; font-family: 'DM Sans', sans-serif; font-size: 0.85rem; background: rgba(0,0,0,0.4); color: var(--white); border: none; border-top: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+  .photo-card select option { background: var(--blue-dark); color: var(--white); }
+  .photo-card.correct select { display: none; }
+
+  .result-section { text-align: center; padding: 24px; background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.1); border-radius: 6px; }
+  .result-section h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; letter-spacing: 2px; color: var(--yellow); margin-bottom: 12px; }
+  .result-nums { font-family: 'JetBrains Mono', monospace; font-size: 1.8rem; font-weight: 700; color: var(--muted); letter-spacing: 4px; margin-bottom: 8px; min-height: 40px; }
+  .result-nums.complete { color: var(--green); text-shadow: 0 0 16px rgba(0,200,83,0.4); }
+  .result-hint { font-size: 0.78rem; color: var(--muted); }
+  .result-link { display: inline-block; margin-top: 14px; font-weight: 700; color: var(--yellow); text-decoration: underline; }
+
+  @media (max-width: 600px) { header { padding: 16px; } header h1 { font-size: 1.8rem; } .grid { grid-template-columns: repeat(2, 1fr); gap: 8px; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">IMBRA 2026 · Escape Room</div>
+  <h1>Barnamyndir af starfsfólki FG</h1>
+  <h2>Þraut 2 — Veldu starfsmann</h2>
+</header>
+
+<main>
+  <div class="intro">
+    <p>Hér eru 8 barnamyndir af starfsfólki FG. Veljið rétt nafn við hverja mynd. Þegar nafnið er rétt birtist tala — notið tölurnar á <strong>afkóðunarsíðunni</strong> til að finna lykilorðið!</p>
+  </div>
+
+  <div class="grid" id="photoGrid"></div>
+
+  <div class="result-section">
+    <h3>Tölurnar ykkar</h3>
+    <div class="result-nums" id="resultNums">? ? ? ? ? ? ? ?</div>
+    <div class="result-hint">Sláið tölurnar inn á afkóðunarsíðunni til að finna lykilorðið</div>
+    <a class="result-link" href="afkodun.html" target="_blank">🔓 Opna afkóðunarsíðu</a>
+  </div>
+</main>
+
+<script>
+const teacherData = [
+  { id: 1, name: "Berglind Magdalena Valdimarsdóttir", num: 31, letter: "Æ", img: "myndir/mynd1.jpg" },
+  { id: 2, name: "Hilmar Þór Sigurjónsson",           num: 22, letter: "S", img: "myndir/mynd2.jpg" },
+  { id: 3, name: "Anna María Gunnarsdóttir",           num: 14, letter: "K", img: "myndir/mynd3.jpg" },
+  { id: 4, name: "Kristinn Þorsteinsson",              num: 2,  letter: "Á", img: "myndir/mynd4.jpg" },
+  { id: 5, name: "Sigrún Fjóla Hilmarsdóttir",         num: 24, letter: "U", img: "myndir/mynd5.jpg" },
+  { id: 6, name: "Dagný Broddadóttir",                 num: 21, letter: "R", img: "myndir/mynd6.jpg" },
+  { id: 7, name: "Sölvi Guðmundsson",                  num: 11, letter: "I", img: "myndir/mynd7.jpg" },
+  { id: 8, name: "Snædís Snæbjörnsdóttir",              num: 17, letter: "N", img: "myndir/mynd8.jpg" },
+];
+
+function shuffle(arr) {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+const solved = new Array(8).fill(false);
+const displayOrder = shuffle(teacherData);
+const extraNames = [
+  "Fríða Gylfadóttir",
+  "Tinna Ösp Arnardóttir",
+  "Davíð Kúld",
+  "Berglind Ómarsdóttir",
+  "Guðmundur Gíslason",
+  "Auður Sigurðardóttir",
+  "Gunnar Hólmsteinn Ársælsson",
+  "Ásdís Björnsdóttir",
+  "Kári Viðarsson",
+  "Kristín Logadóttir",
+  "Edith Edda Unnsteinsdóttir",
+  "Guðni Eiríksson",
+  "Þórunn Björk Sigurbjörnsdóttir"
+];
+const nameOptions = shuffle([...teacherData.map(t => t.name), ...extraNames]);
+
+function render() {
+  const grid = document.getElementById('photoGrid');
+  grid.innerHTML = displayOrder.map((t, i) => {
+    const isSolved = solved[i];
+    const cls = isSolved ? 'correct' : '';
+    const opts = nameOptions.map(n => `<option value="${n}">${n}</option>`).join('');
+    return `
+      <div class="photo-card ${cls}" id="card-${i}">
+        <img src="${t.img}" alt="Mynd ${i+1}">
+        <div class="card-label">Mynd ${i+1}</div>
+        ${!isSolved ? `<select onchange="checkAnswer(${i}, this.value)">
+          <option value="">-- Veldu starfsmann --</option>
+          ${opts}
+        </select>` : ''}
+        <div class="card-name">${t.name}</div>
+        <div class="card-num">${t.num}</div>
+      </div>
+    `;
+  }).join('');
+  updateResult();
+}
+
+function checkAnswer(index, selectedName) {
+  const card = document.getElementById('card-' + index);
+  if (selectedName === displayOrder[index].name) {
+    solved[index] = true;
+    card.classList.add('correct');
+    render();
+  } else if (selectedName) {
+    card.classList.add('wrong');
+    setTimeout(() => card.classList.remove('wrong'), 500);
+  }
+}
+
+function updateResult() {
+  const nums = displayOrder.map((t, i) => solved[i] ? t.num : '?');
+  const el = document.getElementById('resultNums');
+  el.textContent = nums.join('  ');
+  if (solved.every(Boolean)) el.classList.add('complete');
+  else el.classList.remove('complete');
+}
+
+render();
+</script>
+</body>
+</html>
