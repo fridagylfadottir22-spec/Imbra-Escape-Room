@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMBRA 2026 – Escape Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue:        #0033A0;
+    --blue-dark:   #00247A;
+    --blue-darker: #001550;
+    --blue-pale:   #E6ECF8;
+    --orange:      #FF6B00;
+    --orange-dark: #D45700;
+    --orange-pale: #FFF0E6;
+    --yellow:      #F5C400;
+    --yellow-dark: #C9A000;
+    --yellow-pale: #FFFAE0;
+    --white:       #FFFFFF;
+    --off:         #F4F6FB;
+    --border:      #DDE3F0;
+    --text:        #0A1A3A;
+    --muted:       #6B7A99;
+    --green:       #00C853;
+    --green-dark:  #009624;
+    --red:         #FF1744;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--blue-darker);
+    color: var(--white);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── BACKGROUND GRID ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background:
+      linear-gradient(rgba(0,51,160,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,51,160,0.08) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--blue);
+    border-bottom: 5px solid var(--orange);
+    padding: 24px 32px;
+    position: relative;
+    z-index: 10;
+  }
+  .header-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .header-label {
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 2px;
+  }
+  header h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 2.4rem;
+    color: var(--white);
+    letter-spacing: 3px;
+    line-height: 1;
+  }
+  header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    color: var(--yellow);
+    letter-spacing: 2px;
+  }
+
+  /* ── ADMIN TOGGLE ── */
+  .admin-toggle {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 3px;
+    border: 2px solid rgba(255,255,255,0.2);
+    background: transparent;
+    color: rgba(255,255,255,0.6);
+    cursor: pointer;
+    transition: all 0.2s;
+    letter-spacing: 0.5px;
+  }
+  .admin-toggle:hover {
+    border-color: var(--orange);
+    color: var(--orange);
+  }
+  .admin-toggle.active {
+    background: var(--orange);
+    border-color: var(--orange);
+    color: var(--white);
+  }
+
+  /* ── MAIN ── */
+  main {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 32px 24px 80px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── TIMER ── */
+  .timer-section {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .timer-display {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 5rem;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: var(--white);
+    text-shadow: 0 0 30px rgba(245,196,0,0.3);
+    line-height: 1;
+    margin: 16px 0;
+    transition: color 0.5s;
+  }
+  .timer-display.warning {
+    color: var(--orange);
+    text-shadow: 0 0 30px rgba(255,107,0,0.4);
+    animation: pulse-warn 1s ease-in-out infinite;
+  }
+  .timer-display.danger {
+    color: var(--red);
+    text-shadow: 0 0 30px rgba(255,23,68,0.5);
+    animation: pulse-danger 0.5s ease-in-out infinite;
+  }
+  .timer-display.finished {
+    color: var(--muted);
+    text-shadow: none;
+    animation: none;
+  }
+
+  @keyframes pulse-warn {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+  }
+  @keyframes pulse-danger {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+  }
+
+  .timer-label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 4px;
+    color: var(--yellow);
+    text-transform: uppercase;
+  }
+  .timer-bar-wrap {
+    width: 100%;
+    height: 6px;
+    background: rgba(255,255,255,0.1);
+    border-radius: 3px;
+    margin-top: 12px;
+    overflow: hidden;
+  }
+  .timer-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--green), var(--yellow));
+    border-radius: 3px;
+    transition: width 1s linear, background 2s;
+    width: 100%;
+  }
+  .timer-bar.warning {
+    background: linear-gradient(90deg, var(--orange), var(--yellow));
+  }
+  .timer-bar.danger {
+    background: linear-gradient(90deg, var(--red), var(--orange));
+  }
+
+  .timer-controls {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 16px;
+  }
+  .btn {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.82rem;
+    font-weight: 700;
+    padding: 10px 28px;
+    border-radius: 3px;
+    border: none;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    transition: all 0.15s;
+  }
+  .btn-start {
+    background: var(--green);
+    color: var(--white);
+  }
+  .btn-start:hover { background: var(--green-dark); }
+  .btn-pause {
+    background: var(--orange);
+    color: var(--white);
+  }
+  .btn-pause:hover { background: var(--orange-dark); }
+  .btn-reset {
+    background: transparent;
+    color: rgba(255,255,255,0.5);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+  .btn-reset:hover {
+    color: var(--white);
+    border-color: rgba(255,255,255,0.5);
+  }
+
+  /* ── PROGRESS ── */
+  .progress-strip {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 36px;
+  }
+  .progress-dot {
+    flex: 1;
+    height: 8px;
+    border-radius: 4px;
+    background: rgba(255,255,255,0.12);
+    transition: all 0.4s;
+    position: relative;
+  }
+  .progress-dot.complete {
+    background: var(--green);
+    box-shadow: 0 0 8px rgba(0,200,83,0.4);
+  }
+  .progress-dot.active {
+    background: var(--yellow);
+    box-shadow: 0 0 8px rgba(245,196,0,0.4);
+    animation: dot-pulse 2s ease-in-out infinite;
+  }
+  @keyframes dot-pulse {
+    0%, 100% { box-shadow: 0 0 8px rgba(245,196,0,0.2); }
+    50% { box-shadow: 0 0 16px rgba(245,196,0,0.6); }
+  }
+
+  /* ── CHALLENGE CARDS ── */
+  .challenge {
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 6px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: all 0.3s;
+  }
+  .challenge.locked {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+  .challenge.active {
+    opacity: 1;
+    border-color: var(--yellow);
+    box-shadow: 0 0 20px rgba(245,196,0,0.1);
+  }
+  .challenge.complete {
+    opacity: 0.7;
+    border-color: var(--green);
+  }
+
+  .challenge-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 20px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .challenge-num {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.2rem;
+    letter-spacing: 1px;
+    flex-shrink: 0;
+    transition: all 0.3s;
+  }
+  .challenge.locked .challenge-num {
+    background: rgba(255,255,255,0.1);
+    color: rgba(255,255,255,0.3);
+  }
+  .challenge.active .challenge-num {
+    background: var(--yellow);
+    color: var(--blue-dark);
+  }
+  .challenge.complete .challenge-num {
+    background: var(--green);
+    color: var(--white);
+  }
+
+  .challenge-info { flex: 1; }
+  .challenge-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.25rem;
+    letter-spacing: 2px;
+    line-height: 1.1;
+  }
+  .challenge.locked .challenge-title { color: rgba(255,255,255,0.3); }
+  .challenge.active .challenge-title { color: var(--white); }
+  .challenge.complete .challenge-title { color: var(--green); }
+
+  .challenge-desc {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .challenge-status {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+  .challenge.locked .challenge-status {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.25);
+  }
+  .challenge.active .challenge-status {
+    background: var(--yellow);
+    color: var(--blue-dark);
+  }
+  .challenge.complete .challenge-status {
+    background: rgba(0,200,83,0.15);
+    color: var(--green);
+  }
+
+  /* ── CHALLENGE BODY ── */
+  .challenge-body {
+    display: none;
+    padding: 0 20px 20px;
+  }
+  .challenge.active .challenge-body,
+  .challenge.complete .challenge-body {
+    display: block;
+  }
+
+  .challenge-instructions {
+    background: rgba(0,51,160,0.2);
+    border-left: 3px solid var(--blue);
+    padding: 14px 18px;
+    border-radius: 0 4px 4px 0;
+    margin-bottom: 16px;
+  }
+  .challenge-instructions h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 0.95rem;
+    letter-spacing: 2px;
+    color: var(--yellow);
+    margin-bottom: 6px;
+  }
+  .challenge-instructions p {
+    font-size: 0.82rem;
+    line-height: 1.6;
+    color: rgba(255,255,255,0.75);
+  }
+
+  /* Admin hint */
+  .admin-info {
+    display: none;
+    background: rgba(255,107,0,0.1);
+    border: 1px dashed var(--orange);
+    border-radius: 4px;
+    padding: 12px 16px;
+    margin-bottom: 14px;
+  }
+  body.admin-mode .admin-info { display: block; }
+  .admin-info-label {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--orange);
+    margin-bottom: 4px;
+  }
+  .admin-info p {
+    font-size: 0.82rem;
+    color: rgba(255,255,255,0.8);
+    line-height: 1.5;
+  }
+  .admin-info code {
+    font-family: 'JetBrains Mono', monospace;
+    background: rgba(255,107,0,0.2);
+    padding: 2px 6px;
+    border-radius: 2px;
+    color: var(--yellow);
+    font-size: 0.85rem;
+    font-weight: 700;
+  }
+
+  /* ── PASSWORD INPUT ── */
+  .password-row {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+  .password-input {
+    flex: 1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    padding: 12px 16px;
+    border: 2px solid rgba(255,255,255,0.15);
+    border-radius: 4px;
+    background: rgba(0,0,0,0.3);
+    color: var(--white);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .password-input:focus {
+    border-color: var(--yellow);
+  }
+  .password-input.error {
+    border-color: var(--red);
+    animation: shake 0.4s ease-in-out;
+  }
+  .password-input.success {
+    border-color: var(--green);
+  }
+  @keyframes shake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-8px); }
+    40% { transform: translateX(8px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+
+  .btn-submit {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    padding: 13px 24px;
+    border: none;
+    border-radius: 4px;
+    background: var(--yellow);
+    color: var(--blue-dark);
+    cursor: pointer;
+    transition: all 0.15s;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .btn-submit:hover { background: var(--yellow-dark); }
+
+  .error-msg {
+    font-size: 0.78rem;
+    color: var(--red);
+    margin-top: 8px;
+    min-height: 20px;
+  }
+
+  /* ── SUCCESS OVERLAY ── */
+  .success-msg {
+    display: none;
+    text-align: center;
+    padding: 16px;
+    background: rgba(0,200,83,0.1);
+    border: 1px solid rgba(0,200,83,0.3);
+    border-radius: 4px;
+    margin-top: 12px;
+  }
+  .success-msg.show { display: block; animation: fadeIn 0.4s; }
+  .success-msg span {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 1.1rem;
+    letter-spacing: 2px;
+    color: var(--green);
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ── FINAL ── */
+  .final-victory {
+    display: none;
+    text-align: center;
+    padding: 48px 24px;
+    animation: fadeIn 0.6s;
+  }
+  .final-victory.show { display: block; }
+  .final-victory h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 3rem;
+    letter-spacing: 4px;
+    color: var(--yellow);
+    margin-bottom: 8px;
+  }
+  .final-victory p {
+    font-size: 1rem;
+    color: rgba(255,255,255,0.7);
+  }
+  .final-time {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--green);
+    margin: 16px 0;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 600px) {
+    header { padding: 16px; }
+    header h1 { font-size: 1.8rem; }
+    main { padding: 20px 12px 60px; }
+    .timer-display { font-size: 3rem; letter-spacing: 3px; }
+    .challenge-header { padding: 12px 14px; gap: 10px; }
+    .challenge-title { font-size: 1.05rem; }
+    .password-row { flex-direction: column; }
+    .btn-submit { width: 100%; }
+  }
+
+  @media print {
+    body { background: white; color: black; }
+    .timer-section, .timer-controls, .admin-toggle { display: none; }
+    .challenge { opacity: 1 !important; pointer-events: auto !important; }
+    .challenge-body { display: block !important; }
+    .admin-info { display: block !important; border-style: solid; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div>
+      <div class="header-label">Fjölbrautaskólinn í Garðabæ</div>
+      <h1>IMBRA 2026 — ESCAPE ROOM</h1>
+      <h2>Miðvikudagur 10:30–11:30</h2>
+    </div>
+    <button class="admin-toggle" onclick="toggleAdmin()">Kennarahamur</button>
+  </div>
+</header>
+
+<main>
+
+  <!-- TIMER -->
+  <div class="timer-section">
+    <div class="timer-label">Tími eftir</div>
+    <div class="timer-display" id="timer">60:00</div>
+    <div class="timer-bar-wrap">
+      <div class="timer-bar" id="timerBar"></div>
+    </div>
+    <div class="timer-controls">
+      <button class="btn btn-start" id="btnStart" onclick="startTimer()">Byrja</button>
+      <button class="btn btn-pause" id="btnPause" onclick="pauseTimer()" style="display:none;">Pása</button>
+      <button class="btn btn-reset" onclick="resetTimer()">Endurstilla</button>
+    </div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div class="progress-strip" id="progressStrip"></div>
+
+  <!-- CHALLENGES -->
+  <div id="challengeList"></div>
+
+  <!-- VICTORY -->
+  <div class="final-victory" id="finalVictory">
+    <h2>🎉 Þið kláruðuð Escape Room! 🎉</h2>
+    <p>Tíminn ykkar:</p>
+    <div class="final-time" id="finalTime"></div>
+    <p>Vel gert — þið eruð frjáls!</p>
+  </div>
+
+</main>
+
+<script>
+/* ══════════════════════════════════════
+   CHALLENGE DATA
+══════════════════════════════════════ */
+const challenges = [
+  {
+    id: 1,
+    title: "Raðið ykkur eftir aldri",
+    desc: "Samskipti án orða",
+    password: "ALDUR",
+    instructions: `<h4>Leiðbeiningar</h4>
+      <p>Allir í hópnum raða sér í röð eftir aldri — <strong>án þess að tala saman</strong>. Enginn má nota orð, hvísla eða munnlestur. Þegar hópurinn telur sig tilbúinn, segja allir afmælisdaginn sinn upphátt til að staðfesta röðina.</p>
+      <p style="margin-top:8px;">Ef röðin er rétt fáið þið lykilorðið.</p>`,
+    adminInfo: `Lykilorð: <code>ALDUR</code><br>Hópurinn fær lykilorðið þegar þau hafa raðað sér rétt.`
+  },
+  {
+    id: 2,
+    title: "Barnamyndir kennara",
+    desc: "Þekkið þið kennarana ykkar?",
+    password: "AESKUARIN",
+    instructions: `<h4>Leiðbeiningar</h4>
+      <p>Opnið barnamyndasíðuna og parið saman rétt nafn við hverja mynd. Þegar nafnið er rétt birtist <strong>tala</strong>. Notið svo tölurnar á <strong>afkóðunarsíðunni</strong> til að finna lykilorðið.</p>
+      <p style="margin-top:8px;"><a href="barnamyndir.html" target="_blank" style="color:var(--yellow);font-weight:700;text-decoration:underline;">📸 Opna barnamyndasíðu</a></p>
+      <p style="margin-top:6px;"><a href="afkodun.html" target="_blank" style="color:var(--yellow);font-weight:700;text-decoration:underline;">🔓 Opna afkóðunarsíðu</a></p>`,
+    adminInfo: `Lykilorð: <code>ÆSKUÁRIN</code> (slegið inn sem AESKUARIN)<br><br>
+      <strong>Kennarar og tölur:</strong><br>
+      Berglind Magdalena Valdimarsdóttir → <strong>31</strong> (Æ)<br>
+      Hilmar Þór Sigurjónsson → <strong>22</strong> (S)<br>
+      Anna María Gunnarsdóttir → <strong>14</strong> (K)<br>
+      Kristinn Þorsteinsson → <strong>2</strong> (Á)<br>
+      Sigrún Fjóla Hilmarsdóttir → <strong>24</strong> (U)<br>
+      Dagný Broddadóttir → <strong>21</strong> (R)<br>
+      Sölvi Guðmundsson → <strong>11</strong> (I)<br>
+      Snædís Snæbjörnsdóttir → <strong>17</strong> (N)<br><br>
+      Nemendur þurfa að bera kennsl á alla 8 kennarana á barnamyndasíðunni. Þegar rétt nafn er valið birtist tala sem þau nota á afkóðunarsíðunni (íslenskt stafróf: A=1...Ö=32).`
+  },
+  {
+    id: 3,
+    title: "Spurningar um kennara og skóla",
+    desc: "18 spurningar — fyrsti stafur hvers svars gefur leyniskilaboðin",
+    password: "SAMANERUMVIDSTERK",
+    instructions: `<h4>Leiðbeiningar</h4>
+      <p>Opnið spurningasíðuna og svarið 18 spurningunum um kennara og skólann. Fyrsti stafur hvers svars myndar leyniskilaboðin. Skráið lykilorðið <strong>án bila</strong>.</p>
+      <p style="margin-top:8px;"><a href="spurningar.html" target="_blank" style="color:var(--yellow);font-weight:700;text-decoration:underline;">❓ Opna spurningasíðu</a></p>`,
+    adminInfo: `Lykilorð: <code>SAMANERUMVIDSTERK</code> (án bila)<br>
+      Leyniskilaboðin: <strong>SAMAN ERUM VIÐ STERK</strong><br><br>
+      <strong>Spurningarnar og svörin:</strong><br>
+      1. Hver er minnsti starfsmaður skólans? → <strong>S</strong>nædís<br>
+      2. Hvað er algengasta kvenkyns nafn á starfsmönnum? → <strong>A</strong>nna<br>
+      3. Hvað er lengsta millinafn sem karlkyns starfsmaður ber? → <strong>M</strong>axmillian<br>
+      4. Hvaða starfsmaður fer á flesta leiki í efstu deild karla í körfubolta? → <strong>A</strong>uður<br>
+      5. Hvaða starfsmaður situr einnig í bæjarstjórn Garðabæjar? Fyrsta nafn mínus I → I<strong>N</strong>gvar → N<br>
+      6. Hvert er eftirnafn hæsta kennara skólans? → Kári <strong>V</strong>iðarsson<br>
+      7. Hvaða starfsmaður hefur hlaupið Big Six? → <strong>I</strong>ngibjörg<br>
+      8. (Tala) → Nítíu → <strong>N</strong><br>
+      9. ðrjáasafgármánrj → <strong>N</strong>ámsráðgjafar<br>
+      10. Hvað heitir hátíðarsalur skólans? → <strong>U</strong>rðarbrunnur<br>
+      11. Gáta: „Þú átt mig aldrei nóg..." → <strong>M</strong>ínútur<br>
+      12. Hver kennir þýsku? → <strong>V</strong>igdís<br>
+      13. Gáta: „Ég er í skólanum, símanum, heiminum en ósýnilegt?" → <strong>I</strong>nternet<br>
+      14. Hvað eiga Davíð, Fríða, Guðni og Aðalheiður sameiginlegt? → <strong>Ð</strong> (allir hafa ð í nafni)<br>
+      15. Hver er yngsti starfsmaður skólans? → <strong>B</strong>jartur<br>
+      16. Hvaða starfsmaður ber sama sérhljóðann í fyrra og seinna nafni? → <strong>E</strong>dith Edda<br>
+      17. Hvaða starfsmaður er með tattó á bakvið eyrað? → <strong>S</strong>igrún Fjóla<br>
+      18. Hvaða kvenkyns kennari sem hefur kennt lengur en í 15 ár var sjálf í FG? → <strong>T</strong>inna`
+  },
+  {
+    id: 4,
+    title: "Dulmálsþraut",
+    desc: "Afkóðið leyniskilaboðin",
+    password: "VONIN",
+    instructions: `<h4>Leiðbeiningar</h4>
+      <p>Þið fáið skilaboð sem eru dulkóðuð með Caesar-dulmáli. Hver stafur hefur verið færður um ákveðinn fjölda sæta í stafrófinu. Finnið hversu mikið var fært og afkóðið skilaboðin til að fá lykilorðið.</p>
+      <p style="margin-top:8px;font-family:'JetBrains Mono',monospace;font-size:0.95rem;color:var(--yellow);letter-spacing:2px;">YRQLQ</p>
+      <p style="margin-top:6px;font-size:0.78rem;color:var(--muted);">Vísbending: Stafrófið er fært um 3 sæti afturábak (A→X, B→Y, ...)</p>`,
+    adminInfo: `Lykilorð: <code>VONIN</code><br>Caesar-shift: -3. V→Y, O→R, N→Q, I→L, N→Q → YRQLQ.<br>Hægt er að hafa vísbendingu á borði eða gefa hana munnlega ef hópurinn festist.`
+  },
+  {
+    id: 5,
+    title: "Orðarugl",
+    desc: "Endurraðið stöfunum",
+    password: "KRAFTUR",
+    instructions: `<h4>Leiðbeiningar</h4>
+      <p>Stafir hafa verið ruglaðir í handahófsröð. Endurraðið þeim til að mynda rétt orð.</p>
+      <p style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:1.3rem;color:var(--yellow);letter-spacing:6px;text-align:center;">R &nbsp; T &nbsp; K &nbsp; A &nbsp; F &nbsp; U &nbsp; R</p>
+      <p style="margin-top:8px;font-size:0.78rem;color:var(--muted);">Vísbending: Þetta er eitthvað sem þið þurfið til að leysa þrautir...</p>`,
+    adminInfo: `Lykilorð: <code>KRAFTUR</code><br>Stafir R-T-K-A-F-U-R → KRAFTUR. Vísbendingar má gefa ef hópurinn festist.`
+  },
+  {
+    id: 6,
+    title: "Emoji Kvikmyndaþraut",
+    desc: "Hvaða kvikmynd felst á bakvið emoji-kóðann?",
+    password: "LAUSNIN",
+    instructions: `<h4>Leiðbeiningar</h4>
+      <p>Opnið emoji-kvikmyndaþrautina. Þið fáið 7 emoji-kóða og þurfið að giska á hvaða kvikmynd er á bakvið hvern. <strong>Fyrsti stafurinn</strong> í hverri réttri kvikmynd myndar lykilorðið.</p>
+      <p style="margin-top:8px;"><a href="emoji.html" target="_blank" style="color:var(--yellow);font-weight:700;text-decoration:underline;">🎬 Opna emoji-kvikmyndaþraut</a></p>`,
+    adminInfo: `Lykilorð: <code>LAUSNIN</code><br><br>
+      <strong>Svörin:</strong><br>
+      1. 👱‍♀️⚖️💅🏼🎀 → <strong>L</strong>egally Blonde<br>
+      2. 💙🌿👽🏹🌳 → <strong>A</strong>vatar<br>
+      3. 🏠🎈👴🧒🐶 → <strong>U</strong>p (Disney/Pixar)<br>
+      4. 🕷️🦸‍♂️🏙️🕸️ → <strong>S</strong>pider-Man<br>
+      5. ☔💒🇬🇧💛 → <strong>N</strong>otting Hill<br>
+      6. 😀😔😡😨🎭 → <strong>I</strong>nside Out (Disney/Pixar)<br>
+      7. 🐠🌊🦈🐙🪸 → Fi<strong>N</strong>ding Nemo (Disney/Pixar) — N er 7. stafur í "Finding"... nei, F er fyrsti stafur.<br>
+      <em>ATH: Leyniorðið er LAUSNIN = L-A-U-S-N-I-N</em>`
+  },
+  {
+    id: 7,
+    title: "Talnaborð",
+    desc: "Finndu töluna sem kemur bara einu sinni!",
+    password: "47",
+    instructions: `<h4>Leiðbeiningar</h4>
+      <p>Opnið talnaborðið. Þar eru 120 tölur — allar koma fyrir tvisvar eða oftar, <strong>nema ein</strong>. Finnið þá tölu sem kemur bara einu sinni. Það er lykilorðið!</p>
+      <p style="margin-top:8px;"><a href="talnabord.html" target="_blank" style="color:var(--yellow);font-weight:700;text-decoration:underline;">🔢 Opna talnaborð</a></p>`,
+    adminInfo: `Lykilorð: <code>47</code><br><br>Talan 47 kemur bara einu sinni fyrir í talnaborðinu. Allar aðrar tölur koma tvisvar eða oftar. Nemendur geta smellt á tölur til að prófa — ef þeir velja ranga tölu sýnir síðan hversu oft hún kemur fyrir.`
+  },
+  {
+    id: 8,
+    title: "Hópmynd!",
+    desc: "Lokaskrefið",
+    password: "KLARAD",
+    instructions: `<h4>Leiðbeiningar</h4>
+      <p>Nú þarf allur hópurinn að taka hópmynd saman á ákveðnum stað (sjá vísbendinguna). Sýnið kennaranum myndina til að fá lokalykilorðið.</p>
+      <p style="margin-top:8px;font-size:0.78rem;color:var(--muted);">Vísbending um staðsetningu: Þar sem allir byrja daginn í FG... (anddyri/aðalinngang)</p>`,
+    adminInfo: `Lykilorð: <code>KLÁRAÐ</code> (slegið inn sem KLARAD)<br>Nemendur þurfa að taka hópmynd í anddyrinu/aðalinnganginum. Kennarinn staðfestir og gefur lykilorðið.<br>Þetta er síðasta þrautin — eftir þetta klárar hópurinn leikinn!`
+  }
+];
+
+/* ══════════════════════════════════════
+   STATE
+══════════════════════════════════════ */
+let currentChallenge = 0; // index of active challenge
+let timerInterval = null;
+let totalSeconds = 60 * 60; // 60 min
+let remainingSeconds = totalSeconds;
+let timerRunning = false;
+let completedTime = null;
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+function init() {
+  renderProgress();
+  renderChallenges();
+  updateTimer();
+}
+
+function renderProgress() {
+  const strip = document.getElementById('progressStrip');
+  strip.innerHTML = challenges.map((c, i) => {
+    let cls = 'progress-dot';
+    if (i < currentChallenge) cls += ' complete';
+    else if (i === currentChallenge) cls += ' active';
+    return `<div class="${cls}"></div>`;
+  }).join('');
+}
+
+function renderChallenges() {
+  const list = document.getElementById('challengeList');
+  list.innerHTML = challenges.map((c, i) => {
+    let state = 'locked';
+    let statusText = 'Læst';
+    if (i < currentChallenge) { state = 'complete'; statusText = '✓ Lokið'; }
+    else if (i === currentChallenge) { state = 'active'; statusText = 'Virk'; }
+
+    return `
+      <div class="challenge ${state}" id="challenge-${i}">
+        <div class="challenge-header">
+          <div class="challenge-num">${state === 'complete' ? '✓' : c.id}</div>
+          <div class="challenge-info">
+            <div class="challenge-title">${c.title}</div>
+            <div class="challenge-desc">${c.desc}</div>
+          </div>
+          <div class="challenge-status">${statusText}</div>
+        </div>
+        <div class="challenge-body">
+          <div class="challenge-instructions">${c.instructions}</div>
+          <div class="admin-info">
+            <div class="admin-info-label">Kennaraupplýsingar</div>
+            <p>${c.adminInfo}</p>
+          </div>
+          ${state === 'active' ? `
+            <div class="password-row">
+              <input type="text" class="password-input" id="input-${i}" placeholder="Lykilorð..." autocomplete="off" onkeydown="if(event.key==='Enter')submitPassword(${i})">
+              <button class="btn-submit" onclick="submitPassword(${i})">Staðfesta</button>
+            </div>
+            <div class="error-msg" id="error-${i}"></div>
+            <div class="success-msg" id="success-${i}"><span></span></div>
+          ` : ''}
+          ${state === 'complete' ? `
+            <div class="success-msg show"><span>✓ Lykilorð: ${c.password}</span></div>
+          ` : ''}
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+/* ══════════════════════════════════════
+   PASSWORD SUBMIT
+══════════════════════════════════════ */
+function normalizeIcelandic(str) {
+  return str.replace(/Á/g,'A').replace(/á/g,'a').replace(/Ð/g,'D').replace(/ð/g,'d')
+    .replace(/É/g,'E').replace(/é/g,'e').replace(/Í/g,'I').replace(/í/g,'i')
+    .replace(/Ó/g,'O').replace(/ó/g,'o').replace(/Ú/g,'U').replace(/ú/g,'u')
+    .replace(/Ý/g,'Y').replace(/ý/g,'y').replace(/Þ/g,'TH').replace(/þ/g,'th')
+    .replace(/Æ/g,'AE').replace(/æ/g,'ae').replace(/Ö/g,'O').replace(/ö/g,'o');
+}
+
+function submitPassword(index) {
+  const input = document.getElementById(`input-${index}`);
+  const errorEl = document.getElementById(`error-${index}`);
+  const successEl = document.getElementById(`success-${index}`);
+  const rawValue = input.value.trim().toUpperCase().replace(/\s+/g, '');
+  const value = normalizeIcelandic(rawValue);
+  const expected = normalizeIcelandic(challenges[index].password);
+
+  if (!value) {
+    errorEl.textContent = 'Sláið inn lykilorð.';
+    return;
+  }
+
+  if (value === expected) {
+    input.classList.remove('error');
+    input.classList.add('success');
+    errorEl.textContent = '';
+    successEl.innerHTML = `<span>✓ Rétt! Þraut ${index + 1} leyst!</span>`;
+    successEl.classList.add('show');
+
+    setTimeout(() => {
+      currentChallenge = index + 1;
+      renderProgress();
+      renderChallenges();
+
+      if (currentChallenge >= challenges.length) {
+        showVictory();
+      } else {
+        const next = document.getElementById(`challenge-${currentChallenge}`);
+        if (next) next.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 1200);
+  } else {
+    input.classList.add('error');
+    errorEl.textContent = 'Rangt lykilorð — reynið aftur!';
+    setTimeout(() => input.classList.remove('error'), 400);
+  }
+}
+
+/* ══════════════════════════════════════
+   VICTORY
+══════════════════════════════════════ */
+function showVictory() {
+  completedTime = totalSeconds - remainingSeconds;
+  pauseTimer();
+  document.getElementById('finalVictory').classList.add('show');
+  const mins = Math.floor(completedTime / 60);
+  const secs = completedTime % 60;
+  document.getElementById('finalTime').textContent =
+    `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+  document.getElementById('finalVictory').scrollIntoView({ behavior: 'smooth' });
+}
+
+/* ══════════════════════════════════════
+   TIMER
+══════════════════════════════════════ */
+function updateTimer() {
+  const mins = Math.floor(remainingSeconds / 60);
+  const secs = remainingSeconds % 60;
+  const display = document.getElementById('timer');
+  display.textContent = `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+
+  const pct = (remainingSeconds / totalSeconds) * 100;
+  const bar = document.getElementById('timerBar');
+  bar.style.width = pct + '%';
+
+  display.classList.remove('warning', 'danger', 'finished');
+  bar.classList.remove('warning', 'danger');
+
+  if (remainingSeconds <= 0) {
+    display.classList.add('finished');
+    display.textContent = '00:00';
+  } else if (remainingSeconds <= 300) {
+    display.classList.add('danger');
+    bar.classList.add('danger');
+  } else if (remainingSeconds <= 900) {
+    display.classList.add('warning');
+    bar.classList.add('warning');
+  }
+}
+
+function startTimer() {
+  if (timerRunning) return;
+  timerRunning = true;
+  document.getElementById('btnStart').style.display = 'none';
+  document.getElementById('btnPause').style.display = '';
+
+  timerInterval = setInterval(() => {
+    if (remainingSeconds > 0) {
+      remainingSeconds--;
+      updateTimer();
+    } else {
+      pauseTimer();
+    }
+  }, 1000);
+}
+
+function pauseTimer() {
+  timerRunning = false;
+  clearInterval(timerInterval);
+  document.getElementById('btnStart').style.display = '';
+  document.getElementById('btnPause').style.display = 'none';
+  document.getElementById('btnStart').textContent = 'Halda áfram';
+}
+
+function resetTimer() {
+  pauseTimer();
+  remainingSeconds = totalSeconds;
+  currentChallenge = 0;
+  completedTime = null;
+  document.getElementById('btnStart').textContent = 'Byrja';
+  document.getElementById('finalVictory').classList.remove('show');
+  updateTimer();
+  renderProgress();
+  renderChallenges();
+}
+
+/* ══════════════════════════════════════
+   ADMIN
+══════════════════════════════════════ */
+function toggleAdmin() {
+  document.body.classList.toggle('admin-mode');
+  document.querySelector('.admin-toggle').classList.toggle('active');
+}
+
+/* ── GO ── */
+init();
+</script>
+</body>
+</html>
