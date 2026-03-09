@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMBRA 2026 – Dulmálsþraut</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #0033A0; --blue-dark: #00247A; --blue-darker: #001550;
+    --orange: #FF6B00; --yellow: #F5C400; --yellow-dark: #C9A000;
+    --white: #FFFFFF; --muted: #6B7A99; --green: #00C853; --red: #FF1744;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--blue-darker); color: var(--white); min-height: 100vh; }
+  body::before { content: ''; position: fixed; inset: 0; background: linear-gradient(rgba(0,51,160,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0,51,160,0.08) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+
+  header { background: var(--blue); border-bottom: 5px solid var(--orange); padding: 24px 32px; position: relative; z-index: 10; text-align: center; }
+  .header-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); margin-bottom: 2px; }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; color: var(--white); letter-spacing: 3px; line-height: 1; }
+  header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--yellow); letter-spacing: 2px; margin-top: 4px; }
+
+  main { max-width: 700px; margin: 0 auto; padding: 32px 16px 80px; position: relative; z-index: 1; }
+
+  .section { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 28px 24px; margin-bottom: 20px; text-align: center; }
+  .section h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 2px; color: var(--yellow); margin-bottom: 12px; }
+  .section p { font-size: 0.88rem; color: rgba(255,255,255,0.7); line-height: 1.6; }
+
+  .cipher-display { font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; font-weight: 700; letter-spacing: 10px; color: var(--orange); margin: 20px 0; text-shadow: 0 0 20px rgba(255,107,0,0.3); }
+
+  /* Caesar table */
+  .caesar-table { margin: 20px auto; max-width: 100%; overflow-x: auto; }
+  table { border-collapse: collapse; margin: 0 auto; }
+  th { font-family: 'Bebas Neue', sans-serif; font-size: 0.75rem; letter-spacing: 1px; color: var(--muted); padding: 6px 4px; text-align: center; }
+  td { font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; font-weight: 700; text-align: center; padding: 8px 6px; border: 1px solid rgba(255,255,255,0.08); min-width: 28px; }
+  .row-plain td { background: rgba(255,107,0,0.1); color: var(--orange); }
+  .row-cipher td { background: rgba(0,200,83,0.08); color: var(--green); }
+  .row-label { font-family: 'Bebas Neue', sans-serif; font-size: 0.7rem; letter-spacing: 1px; padding: 8px 10px !important; min-width: 60px !important; }
+  .row-plain .row-label { color: var(--orange); background: rgba(255,107,0,0.2); }
+  .row-cipher .row-label { color: var(--green); background: rgba(0,200,83,0.15); }
+
+  .shift-info { font-family: 'JetBrains Mono', monospace; font-size: 1rem; font-weight: 700; color: var(--yellow); background: rgba(245,196,0,0.1); border: 1px solid rgba(245,196,0,0.25); padding: 8px 16px; border-radius: 4px; display: inline-block; margin: 10px 0; }
+
+  .answer-row { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 16px; }
+  .answer-input { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; width: 180px; text-align: center; padding: 12px; border: 2px solid rgba(255,255,255,0.15); border-radius: 6px; background: rgba(0,0,0,0.3); color: var(--white); outline: none; text-transform: uppercase; letter-spacing: 3px; }
+  .answer-input:focus { border-color: var(--yellow); }
+  .answer-input.correct { border-color: var(--green); color: var(--green); }
+  .answer-input.wrong { border-color: var(--red); }
+  .answer-btn { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 700; padding: 13px 24px; border: none; border-radius: 6px; background: var(--yellow); color: var(--blue-dark); cursor: pointer; }
+  .answer-result { margin-top: 12px; min-height: 24px; font-size: 0.88rem; }
+  .answer-result.success { color: var(--green); font-weight: 700; }
+  .answer-result.error { color: var(--red); }
+
+  @media (max-width: 600px) { header { padding: 16px; } header h1 { font-size: 1.8rem; } .cipher-display { font-size: 1.8rem; letter-spacing: 6px; } td { padding: 6px 4px; font-size: 0.7rem; min-width: 22px; } .row-label { font-size: 0.6rem; min-width: 44px !important; padding: 6px 4px !important; } .answer-row { flex-direction: column; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">IMBRA 2026 · Escape Room</div>
+  <h1>🔐 Dulmálsþraut</h1>
+  <h2>Þraut 4 — Afkóðið leyniskilaboðin</h2>
+</header>
+
+<main>
+  <div class="section">
+    <h3>Dulkóðuðu skilaboðin</h3>
+    <p>Þessi stafir hafa verið dulkóðaðir. Notið Caesar-kóðann hér að neðan til að afkóða þá og finna lykilorðið.</p>
+    <div class="cipher-display">YRQLQ</div>
+  </div>
+
+  <div class="section">
+    <h3>Caesar-dulmálskóðinn</h3>
+    <p>Hver stafur hefur verið færður um 3 sæti í stafrófinu:</p>
+    <div class="shift-info">Tilfærsla: +3</div>
+
+    <div class="caesar-table">
+      <table id="caesarTable"></table>
+    </div>
+
+    <p style="margin-top:12px;font-size:0.82rem;color:var(--muted);">Efri röðin er upprunalegi stafurinn. Neðri röðin er dulkóðaði stafurinn. Finnið dulkóðaða stafinn í neðri röðinni og lesið upprunalega stafinn úr efri röðinni.</p>
+  </div>
+
+  <div class="section">
+    <h3>Svarið</h3>
+    <p>Afkóðið YRQLQ og skrifið orðið sem kemur út:</p>
+    <div class="answer-row">
+      <input type="text" class="answer-input" id="answerInput" placeholder="ORÐIÐ..." onkeydown="if(event.key==='Enter')checkAnswer()">
+      <button class="answer-btn" onclick="checkAnswer()">Staðfesta</button>
+    </div>
+    <div class="answer-result" id="answerResult"></div>
+  </div>
+
+  <a href="index.html" style="display:block;text-align:center;margin-top:20px;color:var(--orange);font-weight:700;font-size:0.9rem;text-decoration:none;">← Til baka í Escape Room</a>
+</main>
+
+<script>
+const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const SHIFT = 3;
+
+// Build Caesar table
+const table = document.getElementById('caesarTable');
+let plainRow = '<tr class="row-plain"><td class="row-label">Stafur</td>';
+let cipherRow = '<tr class="row-cipher"><td class="row-label">Dulkóðað</td>';
+
+for (let i = 0; i < 26; i++) {
+  plainRow += `<td>${ALPHA[i]}</td>`;
+  cipherRow += `<td>${ALPHA[(i + SHIFT) % 26]}</td>`;
+}
+plainRow += '</tr>';
+cipherRow += '</tr>';
+table.innerHTML = plainRow + cipherRow;
+
+function checkAnswer() {
+  const input = document.getElementById('answerInput');
+  const resultEl = document.getElementById('answerResult');
+  const val = input.value.trim().toUpperCase();
+
+  if (!val) { resultEl.className = 'answer-result error'; resultEl.textContent = 'Sláið inn orðið!'; return; }
+
+  if (val === 'VONIN') {
+    input.classList.add('correct');
+    resultEl.className = 'answer-result success';
+    resultEl.textContent = '✓ Rétt! Lykilorðið er VONIN — sláið það inn á Escape Room síðunni!';
+  } else {
+    input.classList.add('wrong');
+    resultEl.className = 'answer-result error';
+    resultEl.textContent = 'Rangt — prófið aftur!';
+    setTimeout(() => input.classList.remove('wrong'), 500);
+  }
+}
+</script>
+</body>
+</html>
