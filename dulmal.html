@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="is">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IMBRA 2026 – Dulmálsþraut</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --blue: #0033A0; --blue-dark: #00247A; --blue-darker: #001550;
+    --orange: #FF6B00; --yellow: #F5C400; --yellow-dark: #C9A000;
+    --white: #FFFFFF; --muted: #6B7A99; --green: #00C853; --red: #FF1744;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: var(--blue-darker); color: var(--white); min-height: 100vh; }
+  body::before { content: ''; position: fixed; inset: 0; background: linear-gradient(rgba(0,51,160,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(0,51,160,0.08) 1px, transparent 1px); background-size: 40px 40px; pointer-events: none; z-index: 0; }
+
+  header { background: var(--blue); border-bottom: 5px solid var(--orange); padding: 24px 32px; position: relative; z-index: 10; text-align: center; }
+  .header-label { font-size: 0.68rem; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--orange); margin-bottom: 2px; }
+  header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2.4rem; color: var(--white); letter-spacing: 3px; line-height: 1; }
+  header h2 { font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; color: var(--yellow); letter-spacing: 2px; margin-top: 4px; }
+
+  main { max-width: 700px; margin: 0 auto; padding: 32px 16px 80px; position: relative; z-index: 1; }
+
+  .section { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 8px; padding: 28px 24px; margin-bottom: 20px; text-align: center; }
+  .section h3 { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; letter-spacing: 2px; color: var(--yellow); margin-bottom: 12px; }
+  .section p { font-size: 0.88rem; color: rgba(255,255,255,0.7); line-height: 1.6; }
+
+  .cipher-display { font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; font-weight: 700; letter-spacing: 10px; color: var(--orange); margin: 20px 0; text-shadow: 0 0 20px rgba(255,107,0,0.3); }
+
+  /* Caesar wheel */
+  .wheel-section { margin: 20px 0; }
+  .wheel-label { font-size: 0.8rem; color: var(--muted); margin-bottom: 8px; }
+  .alpha-rows { max-width: 520px; margin: 0 auto; }
+  .alpha-row { display: flex; justify-content: center; gap: 2px; margin-bottom: 4px; }
+  .alpha-row-label { font-family: 'Bebas Neue', sans-serif; font-size: 0.7rem; letter-spacing: 1px; color: var(--muted); text-align: center; margin-bottom: 2px; }
+  .a-cell { width: 20px; height: 28px; display: flex; align-items: center; justify-content: center; font-family: 'JetBrains Mono', monospace; font-size: 0.7rem; font-weight: 700; border-radius: 3px; }
+  .a-cell.top { background: rgba(255,107,0,0.15); color: var(--orange); border: 1px solid rgba(255,107,0,0.3); }
+  .a-cell.bot { background: rgba(0,200,83,0.1); color: var(--green); border: 1px solid rgba(0,200,83,0.2); }
+  .arrow-row { display: flex; justify-content: center; gap: 2px; }
+  .arrow-cell { width: 20px; height: 14px; display: flex; align-items: center; justify-content: center; font-size: 0.5rem; color: var(--muted); }
+
+  .shift-control { display: flex; align-items: center; justify-content: center; gap: 12px; margin: 16px 0; }
+  .shift-btn { width: 36px; height: 36px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); background: transparent; color: var(--white); font-size: 1.2rem; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .shift-btn:hover { border-color: var(--yellow); color: var(--yellow); }
+  .shift-val { font-family: 'JetBrains Mono', monospace; font-size: 1.4rem; font-weight: 700; color: var(--yellow); min-width: 40px; text-align: center; }
+  .shift-label { font-size: 0.78rem; color: var(--muted); }
+
+  .decoded-display { font-family: 'JetBrains Mono', monospace; font-size: 2.5rem; font-weight: 700; letter-spacing: 10px; color: var(--green); margin: 16px 0; min-height: 50px; text-shadow: 0 0 20px rgba(0,200,83,0.3); }
+
+  .answer-row { display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 16px; }
+  .answer-input { font-family: 'JetBrains Mono', monospace; font-size: 1.2rem; font-weight: 700; width: 180px; text-align: center; padding: 12px; border: 2px solid rgba(255,255,255,0.15); border-radius: 6px; background: rgba(0,0,0,0.3); color: var(--white); outline: none; text-transform: uppercase; letter-spacing: 3px; }
+  .answer-input:focus { border-color: var(--yellow); }
+  .answer-input.correct { border-color: var(--green); color: var(--green); }
+  .answer-input.wrong { border-color: var(--red); }
+  .answer-btn { font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 700; padding: 13px 24px; border: none; border-radius: 6px; background: var(--yellow); color: var(--blue-dark); cursor: pointer; }
+  .answer-result { margin-top: 12px; min-height: 24px; font-size: 0.88rem; }
+  .answer-result.success { color: var(--green); font-weight: 700; }
+  .answer-result.error { color: var(--red); }
+
+  .hint-box { background: rgba(245,196,0,0.06); border: 1px dashed rgba(245,196,0,0.3); border-radius: 6px; padding: 14px; margin-top: 16px; }
+  .hint-box p { font-size: 0.82rem; color: rgba(255,255,255,0.5); }
+
+  @media (max-width: 600px) { header { padding: 16px; } header h1 { font-size: 1.8rem; } .cipher-display, .decoded-display { font-size: 1.8rem; letter-spacing: 6px; } .a-cell { width: 14px; height: 22px; font-size: 0.55rem; } .arrow-cell { width: 14px; } .answer-row { flex-direction: column; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-label">IMBRA 2026 · Escape Room</div>
+  <h1>🔐 Dulmálsþraut</h1>
+  <h2>Þraut 4 — Afkóðið leyniskilaboðin</h2>
+</header>
+
+<main>
+  <div class="section">
+    <h3>Dulkóðuðu skilaboðin</h3>
+    <p>Þessi stafir hafa verið dulkóðaðir með Caesar-dulmáli. Hver stafur hefur verið færður um ákveðinn fjölda sæta í stafrófinu.</p>
+    <div class="cipher-display">YRQLQ</div>
+  </div>
+
+  <div class="section">
+    <h3>Caesar-dulmálskóðinn</h3>
+    <p>Notið hjólið til að finna rétta tilfærslu. Breytið tölunni og sjáið hvernig stafirnir breytast.</p>
+
+    <div class="shift-control">
+      <div class="shift-label">Tilfærsla:</div>
+      <button class="shift-btn" onclick="changeShift(-1)">−</button>
+      <div class="shift-val" id="shiftVal">0</div>
+      <button class="shift-btn" onclick="changeShift(1)">+</button>
+    </div>
+
+    <div class="alpha-rows">
+      <div class="alpha-row-label" style="color:var(--orange);">Dulkóðað (efri röð)</div>
+      <div class="alpha-row" id="topRow"></div>
+      <div class="arrow-row" id="arrowRow"></div>
+      <div class="alpha-row" id="botRow"></div>
+      <div class="alpha-row-label" style="color:var(--green);">Afkóðað (neðri röð)</div>
+    </div>
+
+    <div style="margin-top:20px;">
+      <div style="font-size:0.78rem;color:var(--muted);margin-bottom:6px;">Afkóðuðu skilaboðin með tilfærslu <span id="shiftDisplay">0</span>:</div>
+      <div class="decoded-display" id="decodedDisplay">YRQLQ</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h3>Svarið</h3>
+    <p>Þegar þið hafið fundið rétta tilfærsluna, skrifið afkóðaða orðið:</p>
+    <div class="answer-row">
+      <input type="text" class="answer-input" id="answerInput" placeholder="ORÐIÐ..." onkeydown="if(event.key==='Enter')checkAnswer()">
+      <button class="answer-btn" onclick="checkAnswer()">Staðfesta</button>
+    </div>
+    <div class="answer-result" id="answerResult"></div>
+
+    <div class="hint-box">
+      <p>💡 <strong>Vísbending:</strong> Caesar-dulmál færir hvern staf um ákveðinn fjölda sæta. Til dæmis ef tilfærslan er 3 þá verður A → D, B → E, o.s.frv. Prófið mismunandi tilfærslur þar til orðið sem kemur út er skynsamlegt!</p>
+    </div>
+  </div>
+
+  <a href="index.html" style="display:block;text-align:center;margin-top:20px;color:var(--orange);font-weight:700;font-size:0.9rem;text-decoration:none;">← Til baka í Escape Room</a>
+</main>
+
+<script>
+const ALPHA = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const CIPHER = 'YRQLQ';
+const ANSWER = 'VONIN';
+let shift = 0;
+
+function caesarShift(text, s) {
+  return text.split('').map(ch => {
+    const idx = ALPHA.indexOf(ch.toUpperCase());
+    if (idx === -1) return ch;
+    return ALPHA[(idx + s + 26) % 26];
+  }).join('');
+}
+
+function changeShift(delta) {
+  shift = ((shift + delta) % 26 + 26) % 26;
+  updateDisplay();
+}
+
+function updateDisplay() {
+  document.getElementById('shiftVal').textContent = shift;
+  document.getElementById('shiftDisplay').textContent = shift;
+
+  // Update alphabet rows
+  const topRow = document.getElementById('topRow');
+  const botRow = document.getElementById('botRow');
+  const arrowRow = document.getElementById('arrowRow');
+  topRow.innerHTML = '';
+  botRow.innerHTML = '';
+  arrowRow.innerHTML = '';
+
+  for (let i = 0; i < 26; i++) {
+    const orig = ALPHA[i];
+    const shifted = ALPHA[(i + shift) % 26];
+    topRow.innerHTML += `<div class="a-cell top">${orig}</div>`;
+    botRow.innerHTML += `<div class="a-cell bot">${shifted}</div>`;
+    arrowRow.innerHTML += `<div class="arrow-cell">↓</div>`;
+  }
+
+  // Decode cipher with current shift
+  const decoded = caesarShift(CIPHER, shift);
+  document.getElementById('decodedDisplay').textContent = decoded;
+}
+
+function checkAnswer() {
+  const input = document.getElementById('answerInput');
+  const resultEl = document.getElementById('answerResult');
+  const val = input.value.trim().toUpperCase();
+
+  if (!val) { resultEl.className = 'answer-result error'; resultEl.textContent = 'Sláið inn orðið!'; return; }
+
+  if (val === ANSWER) {
+    input.classList.add('correct');
+    resultEl.className = 'answer-result success';
+    resultEl.textContent = '✓ Rétt! Lykilorðið er VONIN — sláið það inn á Escape Room síðunni!';
+  } else {
+    input.classList.add('wrong');
+    resultEl.className = 'answer-result error';
+    resultEl.textContent = 'Rangt — prófið aðra tilfærslu!';
+    setTimeout(() => input.classList.remove('wrong'), 500);
+  }
+}
+
+updateDisplay();
+</script>
+</body>
+</html>
