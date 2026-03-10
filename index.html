@@ -614,9 +614,8 @@ const challenges = [
     desc: "Þekkið þið kennarana ykkar?",
     password: "AESKUARIN",
     instructions: `<h4>Leiðbeiningar</h4>
-      <p>Opnið barnamyndasíðuna og parið saman rétt nafn við hverja mynd. Þegar nafnið er rétt birtist <strong>tala</strong>. Notið svo tölurnar á <strong>afkóðunarsíðunni</strong> til að finna lykilorðið.</p>
-      <p style="margin-top:8px;"><a href="barnamyndir.html" style="color:var(--yellow);font-weight:700;text-decoration:underline;">📸 Opna barnamyndasíðu</a></p>
-      <p style="margin-top:6px;"><a href="afkodun.html" style="color:var(--yellow);font-weight:700;text-decoration:underline;">🔓 Opna afkóðunarsíðu</a></p>`,
+      <p>Opnið barnamyndasíðuna og parið saman rétt nafn við hverja mynd. Þegar nafnið er rétt birtist <strong>tala</strong>. Notið svo tölurnar til að afkóða stafina og leysið stafaruglið til að finna lykilorðið.</p>
+      <p style="margin-top:8px;"><a href="barnamyndir.html" style="color:var(--yellow);font-weight:700;text-decoration:underline;">📸 Opna barnamyndasíðu</a></p>`,
     adminInfo: `Lykilorð: <code>ÆSKUÁRIN</code> (slegið inn sem AESKUARIN)<br><br>
       <strong>Kennarar og tölur:</strong><br>
       Berglind Magdalena Valdimarsdóttir → <strong>31</strong> (Æ)<br>
@@ -978,7 +977,7 @@ function resetTimer() {
 function toggleAdmin() {
   if (!document.body.classList.contains('admin-mode')) {
     const pw = prompt('Lykilorð kennara:');
-    if (pw !== 'imbra2026') return;
+    if (pw !== 'Kristinn107') return;
   }
   document.body.classList.toggle('admin-mode');
   document.querySelector('.admin-toggle').classList.toggle('active');
